@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -203,10 +204,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🐍 貪食蛇遊戲</h1>
-        
+
         <div class="stats">
             <div class="stat-box">
                 <div class="stat-label">分數</div>
@@ -260,10 +262,10 @@
 
         // 遊戲狀態
         let gameState = {
-            snake: [{x: 10, y: 10}],
-            food: {x: 15, y: 15},
-            direction: {x: 1, y: 0},
-            nextDirection: {x: 1, y: 0},
+            snake: [{ x: 10, y: 10 }],
+            food: { x: 15, y: 15 },
+            direction: { x: 1, y: 0 },
+            nextDirection: { x: 1, y: 0 },
             score: 0,
             highScore: localStorage.getItem('snakeHighScore') || 0,
             level: 1,
@@ -275,9 +277,9 @@
 
         // 初始化
         function initGame() {
-            gameState.snake = [{x: 10, y: 10}];
-            gameState.direction = {x: 1, y: 0};
-            gameState.nextDirection = {x: 1, y: 0};
+            gameState.snake = [{ x: 10, y: 10 }];
+            gameState.direction = { x: 1, y: 0 };
+            gameState.nextDirection = { x: 1, y: 0 };
             gameState.score = 0;
             gameState.level = 1;
             gameState.foodsEaten = 0;
@@ -297,7 +299,7 @@
                     x: Math.floor(Math.random() * TILE_COUNT),
                     y: Math.floor(Math.random() * TILE_COUNT)
                 };
-                collision = gameState.snake.some(segment => 
+                collision = gameState.snake.some(segment =>
                     segment.x === newFood.x && segment.y === newFood.y
                 );
             }
@@ -319,7 +321,7 @@
         function togglePause() {
             if (gameState.isGameRunning) {
                 gameState.isPaused = !gameState.isPaused;
-                document.getElementById('pauseBtn').textContent = 
+                document.getElementById('pauseBtn').textContent =
                     gameState.isPaused ? '繼續' : '暫停';
                 if (!gameState.isPaused) {
                     gameLoop();
@@ -343,7 +345,7 @@
             if (!gameState.isGameRunning || gameState.isPaused) return;
 
             // 更新蛇的方向
-            gameState.direction = {...gameState.nextDirection};
+            gameState.direction = { ...gameState.nextDirection };
 
             // 計算新蛇頭位置
             const head = gameState.snake[0];
@@ -353,14 +355,14 @@
             };
 
             // 檢查撞牆
-            if (newHead.x < 0 || newHead.x >= TILE_COUNT || 
+            if (newHead.x < 0 || newHead.x >= TILE_COUNT ||
                 newHead.y < 0 || newHead.y >= TILE_COUNT) {
                 endGame('撞到牆壁了！');
                 return;
             }
 
             // 檢查撞到自己
-            if (gameState.snake.some(segment => 
+            if (gameState.snake.some(segment =>
                 segment.x === newHead.x && segment.y === newHead.y)) {
                 endGame('撞到自己了！');
                 return;
@@ -372,7 +374,7 @@
             if (newHead.x === gameState.food.x && newHead.y === gameState.food.y) {
                 gameState.foodsEaten++;
                 gameState.score = gameState.snake.length - 3;
-                
+
                 // 每吃 5 個食物提升速度
                 if (gameState.foodsEaten % 5 === 0) {
                     gameState.level++;
@@ -392,7 +394,7 @@
         // 結束遊戲
         function endGame(reason) {
             gameState.isGameRunning = false;
-            
+
             // 更新最高分
             if (gameState.score > gameState.highScore) {
                 gameState.highScore = gameState.score;
@@ -423,16 +425,16 @@
         function drawDecorations() {
             // 繪製隨機分佈的小桃心和小花
             ctx.save();
-            
+
             // 設定隨機種子以保持一致的圖案
             for (let i = 0; i < 25; i++) {
                 const x = (i * 50 + 80) % canvas.width;
                 const y = (i * 50 + 150) % canvas.height;
-                
+
                 // 小桃心
                 if (i % 3 === 0) {
                     drawSmallHeart(x, y);
-                } 
+                }
                 // 小星星
                 else if (i % 3 === 1) {
                     drawSmallStar(x, y);
@@ -442,7 +444,7 @@
                     drawSmallFlower(x, y);
                 }
             }
-            
+
             ctx.restore();
         }
 
@@ -479,7 +481,7 @@
         // 繪製小花
         function drawSmallFlower(x, y) {
             const petalColor = ['rgba(255, 192, 203, 0.4)', 'rgba(255, 182, 217, 0.4)', 'rgba(255, 192, 224, 0.4)'];
-            
+
             for (let i = 0; i < 5; i++) {
                 const angle = (i * 2 * Math.PI) / 5;
                 const px = x + 3 * Math.cos(angle);
@@ -489,7 +491,7 @@
                 ctx.arc(px, py, 1.5, 0, Math.PI * 2);
                 ctx.fill();
             }
-            
+
             // 花心
             ctx.fillStyle = 'rgba(255, 215, 240, 0.6)';
             ctx.beginPath();
@@ -531,7 +533,7 @@
                     // 蛇頭 - Hello Kitty風格
                     const headX = segment.x * GRID_SIZE + GRID_SIZE / 2;
                     const headY = segment.y * GRID_SIZE + GRID_SIZE / 2;
-                    
+
                     // 臉部 - 白色圓形
                     ctx.fillStyle = '#FFFFFF';
                     ctx.beginPath();
@@ -576,7 +578,7 @@
                     ctx.beginPath();
                     ctx.ellipse(headX - 8, headY - 11, 5, 6, -Math.PI / 3, 0, Math.PI * 2);
                     ctx.fill();
-                    
+
                     // 蝴蝶結中間
                     ctx.fillStyle = '#FF69B4';
                     ctx.beginPath();
@@ -586,7 +588,7 @@
                     // 蛇身 - Hello Kitty風格的圓形身體
                     const bodyX = segment.x * GRID_SIZE + GRID_SIZE / 2;
                     const bodyY = segment.y * GRID_SIZE + GRID_SIZE / 2;
-                    
+
                     // 身體 - 淡粉紅
                     ctx.fillStyle = '#FFE4E1';
                     ctx.beginPath();
@@ -652,28 +654,28 @@
         document.addEventListener('keydown', (e) => {
             if (!gameState.isGameRunning) return;
 
-            switch(e.key) {
+            switch (e.key) {
                 case 'ArrowUp':
                     if (gameState.direction.y === 0) {
-                        gameState.nextDirection = {x: 0, y: -1};
+                        gameState.nextDirection = { x: 0, y: -1 };
                         e.preventDefault();
                     }
                     break;
                 case 'ArrowDown':
                     if (gameState.direction.y === 0) {
-                        gameState.nextDirection = {x: 0, y: 1};
+                        gameState.nextDirection = { x: 0, y: 1 };
                         e.preventDefault();
                     }
                     break;
                 case 'ArrowLeft':
                     if (gameState.direction.x === 0) {
-                        gameState.nextDirection = {x: -1, y: 0};
+                        gameState.nextDirection = { x: -1, y: 0 };
                         e.preventDefault();
                     }
                     break;
                 case 'ArrowRight':
                     if (gameState.direction.x === 0) {
-                        gameState.nextDirection = {x: 1, y: 0};
+                        gameState.nextDirection = { x: 1, y: 0 };
                         e.preventDefault();
                     }
                     break;
@@ -689,4 +691,5 @@
         updateScore();
     </script>
 </body>
+
 </html>

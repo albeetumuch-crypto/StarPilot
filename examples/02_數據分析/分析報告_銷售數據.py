@@ -1,3 +1,7 @@
+from openpyxl.utils import get_column_letter
+from openpyxl.drawing.image import Image as XLImage
+from io import BytesIO
+import seaborn as sns
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -7,8 +11,6 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
-import seaborn as sns
-from io import BytesIO
 
 # 設定中文字體
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
@@ -102,8 +104,8 @@ chart1_bytes.seek(0)
 fig2, ax2 = plt.subplots(figsize=(10, 6))
 region_sales = df.groupby('地區')['金額'].sum().sort_values(ascending=False)
 colors = sns.color_palette("Set2", len(region_sales))
-wedges, texts, autotexts = ax2.pie(region_sales.values, labels=region_sales.index, 
-                                     autopct='%1.1f%%', colors=colors, startangle=90)
+wedges, texts, autotexts = ax2.pie(region_sales.values, labels=region_sales.index,
+                                   autopct='%1.1f%%', colors=colors, startangle=90)
 ax2.set_title('各地區銷售分布', fontsize=14, fontweight='bold')
 for autotext in autotexts:
     autotext.set_color('white')
@@ -117,8 +119,10 @@ chart2_bytes.seek(0)
 # 圖表3: 月份銷售趨勢
 fig3, ax3 = plt.subplots(figsize=(12, 6))
 monthly_sales = df.groupby('年月')['金額'].sum()
-ax3.plot(range(len(monthly_sales)), monthly_sales.values, marker='o', linewidth=2.5, markersize=8, color='steelblue')
-ax3.fill_between(range(len(monthly_sales)), monthly_sales.values, alpha=0.3, color='steelblue')
+ax3.plot(range(len(monthly_sales)), monthly_sales.values,
+         marker='o', linewidth=2.5, markersize=8, color='steelblue')
+ax3.fill_between(range(len(monthly_sales)),
+                 monthly_sales.values, alpha=0.3, color='steelblue')
 ax3.set_xticks(range(len(monthly_sales)))
 ax3.set_xticklabels(monthly_sales.index, rotation=45)
 ax3.set_ylabel('銷售額 ($)', fontsize=12)
@@ -152,8 +156,6 @@ chart4_bytes.seek(0)
 # ==================== 生成 Excel 文件 ====================
 print("\n📁 生成 Excel 報告...")
 
-from openpyxl.drawing.image import Image as XLImage
-from openpyxl.utils import get_column_letter
 
 # 創建工作簿
 wb = Workbook()
@@ -166,7 +168,8 @@ ws_summary.sheet_properties.tabColor = "FFFF00"
 # 標題
 ws_summary['A1'] = '銷售數據分析報告'
 ws_summary['A1'].font = Font(size=18, bold=True, color="FFFFFF")
-ws_summary['A1'].fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+ws_summary['A1'].fill = PatternFill(
+    start_color="366092", end_color="366092", fill_type="solid")
 ws_summary.merge_cells('A1:D1')
 ws_summary['A1'].alignment = Alignment(horizontal='center', vertical='center')
 ws_summary.row_dimensions[1].height = 30
@@ -181,7 +184,8 @@ headers = ['指標', '數值']
 for col, header in enumerate(headers, 1):
     cell = ws_summary.cell(row=row, column=col, value=header)
     cell.font = Font(bold=True, color="FFFFFF", size=12)
-    cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    cell.fill = PatternFill(start_color="4472C4",
+                            end_color="4472C4", fill_type="solid")
     cell.alignment = Alignment(horizontal='center')
 
 data = [
@@ -194,11 +198,13 @@ data = [
 ]
 
 for idx, row_data in enumerate(data, 5):
-    ws_summary.cell(row=idx, column=1, value=row_data[0]).font = Font(bold=True)
+    ws_summary.cell(row=idx, column=1,
+                    value=row_data[0]).font = Font(bold=True)
     ws_summary.cell(row=idx, column=2, value=row_data[1]).font = Font(size=11)
     if idx % 2 == 0:
         for col in range(1, 3):
-            ws_summary.cell(row=idx, column=col).fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
+            ws_summary.cell(row=idx, column=col).fill = PatternFill(
+                start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
 
 ws_summary.column_dimensions['A'].width = 15
 ws_summary.column_dimensions['B'].width = 20
@@ -216,11 +222,13 @@ for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
         cell = ws_data.cell(row=r_idx, column=c_idx, value=value)
         if r_idx == 1:
             cell.font = Font(bold=True, color="FFFFFF", size=11)
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.fill = PatternFill(
+                start_color="4472C4", end_color="4472C4", fill_type="solid")
             cell.alignment = Alignment(horizontal='center')
         else:
             if r_idx % 2 == 0:
-                cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                cell.fill = PatternFill(
+                    start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
 for col in ws_data.columns:
     max_length = 0
@@ -231,7 +239,8 @@ for col in ws_data.columns:
         except:
             pass
     adjusted_width = min(max_length + 2, 30)
-    ws_data.column_dimensions[get_column_letter(col[0].column)].width = adjusted_width
+    ws_data.column_dimensions[get_column_letter(
+        col[0].column)].width = adjusted_width
 
 # ===== 工作表3: 產品分析 =====
 ws_product = wb.create_sheet("產品分析", 2)
@@ -244,10 +253,12 @@ for r_idx, row in enumerate(dataframe_to_rows(product_stats.reset_index(), index
         cell = ws_product.cell(row=r_idx, column=c_idx, value=value)
         if r_idx == 3:
             cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.fill = PatternFill(
+                start_color="4472C4", end_color="4472C4", fill_type="solid")
         else:
             if r_idx % 2 == 0:
-                cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                cell.fill = PatternFill(
+                    start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
 for col in range(1, 6):
     ws_product.column_dimensions[get_column_letter(col)].width = 15
@@ -269,10 +280,12 @@ for r_idx, row in enumerate(dataframe_to_rows(region_stats.reset_index(), index=
         cell = ws_region.cell(row=r_idx, column=c_idx, value=value)
         if r_idx == 3:
             cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.fill = PatternFill(
+                start_color="4472C4", end_color="4472C4", fill_type="solid")
         else:
             if r_idx % 2 == 0:
-                cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                cell.fill = PatternFill(
+                    start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
 for col in range(1, 6):
     ws_region.column_dimensions[get_column_letter(col)].width = 15
@@ -294,10 +307,12 @@ for r_idx, row in enumerate(dataframe_to_rows(monthly_stats.reset_index(), index
         cell = ws_monthly.cell(row=r_idx, column=c_idx, value=value)
         if r_idx == 3:
             cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.fill = PatternFill(
+                start_color="4472C4", end_color="4472C4", fill_type="solid")
         else:
             if r_idx % 2 == 0:
-                cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                cell.fill = PatternFill(
+                    start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
 for col in range(1, 6):
     ws_monthly.column_dimensions[get_column_letter(col)].width = 15
@@ -319,10 +334,12 @@ for r_idx, row in enumerate(dataframe_to_rows(sales_stats.reset_index(), index=F
         cell = ws_sales.cell(row=r_idx, column=c_idx, value=value)
         if r_idx == 3:
             cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.fill = PatternFill(
+                start_color="4472C4", end_color="4472C4", fill_type="solid")
         else:
             if r_idx % 2 == 0:
-                cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                cell.fill = PatternFill(
+                    start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
 for col in range(1, 6):
     ws_sales.column_dimensions[get_column_letter(col)].width = 15
