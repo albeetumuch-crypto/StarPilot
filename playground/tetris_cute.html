@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎀 可愛粉色俄羅斯方塊 🎀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+            background: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 50%, #ffd4e5 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: linear-gradient(135deg, #fff5fa 0%, #ffe6f0 100%);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(255, 105, 180, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            color: #ff69b4;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0px rgba(255, 192, 203, 0.5);
+            font-weight: bold;
+        }
+
+        .game-wrapper {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .game-board-container {
+            position: relative;
+        }
+
+        #gameBoard {
+            display: inline-grid;
+            grid-template-columns: repeat(10, 30px);
+            gap: 2px;
+            background: linear-gradient(135deg, #fff9fc 0%, #fff0f5 100%);
+            padding: 10px;
+            border-radius: 15px;
+            border: 3px solid #ffb6d9;
+            box-shadow: inset 0 0 10px rgba(255, 192, 203, 0.3),
+                        0 5px 15px rgba(255, 105, 180, 0.1);
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            background: #fff5fa;
+            border-radius: 6px;
+            border: 1px solid #ffe6f0;
+            transition: all 0.1s ease;
+        }
+
+        .cell.filled {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.4),
+                        0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 可愛的顏色方案 - 粉色系 */
+        .color0 { background: linear-gradient(135deg, #ff69b4, #ff1493); } /* 紅粉色 */
+        .color1 { background: linear-gradient(135deg, #ffb6c1, #ff69b4); } /* 淺粉色 */
+        .color2 { background: linear-gradient(135deg, #ffc0cb, #ffb6d9); } /* 粉色 */
+        .color3 { background: linear-gradient(135deg, #ffd4e5, #ffc0cb); } /* 淡粉色 */
+        .color4 { background: linear-gradient(135deg, #ff85c0, #ff69b4); } /* 玫瑰粉 */
+        .color5 { background: linear-gradient(135deg, #ffb3d9, #ff85c0); } /* 紫粉色 */
+        .color6 { background: linear-gradient(135deg, #ff99cc, #ffb3d9); } /* 珊瑚粉 */
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 150px;
+        }
+
+        .panel {
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe6f0 100%);
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #ffb6d9;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.1);
+        }
+
+        .panel-title {
+            color: #ff69b4;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .panel-value {
+            color: #ff1493;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #nextBox {
+            display: inline-grid;
+            grid-template-columns: repeat(4, 25px);
+            gap: 2px;
+            background: #fff5fa;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #ffe6f0;
+            margin-top: 5px;
+        }
+
+        #nextBox .cell {
+            width: 25px;
+            height: 25px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Comic Sans MS', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffb6d9, #ff85c0);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 85, 192, 0.2);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 85, 192, 0.3);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #fff5fa, #ffe6f0);
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #ffb6d9;
+            font-size: 13px;
+            color: #d63384;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #ff69b4;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .instructions p {
+            margin: 5px 0;
+        }
+
+        .key {
+            background: #fff0f5;
+            border: 1px solid #ffb6d9;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-weight: bold;
+            font-family: monospace;
+            color: #ff1493;
+            display: inline-block;
+            margin: 0 2px;
+        }
+
+        .game-over-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 105, 180, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe6f0 100%);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            border: 3px solid #ff69b4;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: #ff69b4;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #d63384;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .modal-content button {
+            min-width: 150px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #ffb6d9;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">🎀 可愛粉色俄羅斯方塊 🎀</div>
+
+        <div class="game-wrapper">
+            <div class="game-board-container">
+                <div id="gameBoard"></div>
+            </div>
+
+            <div class="sidebar">
+                <div class="panel">
+                    <div class="panel-title">分 數</div>
+                    <div class="panel-value" id="score">0</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">等 級</div>
+                    <div class="panel-value" id="level">1</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">消 除</div>
+                    <div class="panel-value" id="lines">0</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">下 一 個</div>
+                    <div id="nextBox"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn-primary" id="startBtn">開 始 遊 戲</button>
+                    <button class="btn-secondary" id="pauseBtn">暫 停</button>
+                    <button class="btn-secondary" id="resetBtn">重 新 開 始</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🎮 遊 戲 說 明</h3>
+            <p><span class="key">← →</span> 左右移動</p>
+            <p><span class="key">↓</span> 加速下落</p>
+            <p><span class="key">space</span> 旋轉方塊</p>
+            <p><span class="key">P</span> 暫停/繼續</p>
+            <p>每消除 10 行，等級提升 1 級！ ⭐</p>
+        </div>
+
+        <div class="footer">💕 祝你玩得愉快！💕</div>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2>遊 戲 結 束</h2>
+            <p id="finalScore">最終分數: 0</p>
+            <button class="btn-primary" onclick="document.getElementById('gameOverModal').style.display='none'; resetGame();">再 玩 一 次</button>
+        </div>
+    </div>
+
+    <script>
+        const ROWS = 20;
+        const COLS = 10;
+        const CELL_SIZE = 30;
+
+        // 俄羅斯方塊形狀定義
+        const TETRIS_SHAPES = [
+            // I 形 (淺粉色)
+            [[1, 1, 1, 1]],
+            // O 形 (粉色)
+            [[1, 1], [1, 1]],
+            // T 形 (紫粉色)
+            [[0, 1, 0], [1, 1, 1]],
+            // L 形 (珊瑚粉)
+            [[1, 0], [1, 0], [1, 1]],
+            // J 形 (玫瑰粉)
+            [[0, 1], [0, 1], [1, 1]],
+            // S 形 (紅粉色)
+            [[0, 1, 1], [1, 1, 0]],
+            // Z 形 (淡粉色)
+            [[1, 1, 0], [0, 1, 1]]
+        ];
+
+        let board = [];
+        let currentPiece = null;
+        let currentX = 0;
+        let currentY = 0;
+        let currentRotation = 0;
+        let nextPiece = null;
+        let nextColor = 0;
+        let gameRunning = false;
+        let gamePaused = false;
+        let gameOver = false;
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let dropSpeed = 800;
+        let gameLoopInterval = null;
+
+        // 初始化遊戲板
+        function initBoard() {
+            board = [];
+            for (let i = 0; i < ROWS; i++) {
+                board[i] = [];
+                for (let j = 0; j < COLS; j++) {
+                    board[i][j] = 0;
+                }
+            }
+        }
+
+        // 繪製遊戲板
+        function drawBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (board[i][j] !== 0) {
+                        cell.classList.add('filled', `color${board[i][j] - 1}`);
+                    }
+                    gameBoard.appendChild(cell);
+                }
+            }
+
+            // 繪製當前方塊
+            if (currentPiece && !gameOver) {
+                const shape = TETRIS_SHAPES[currentPiece][currentRotation];
+                for (let i = 0; i < shape.length; i++) {
+                    for (let j = 0; j < shape[i].length; j++) {
+                        if (shape[i][j]) {
+                            const y = currentY + i;
+                            const x = currentX + j;
+                            if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
+                                const index = y * COLS + x;
+                                const cells = gameBoard.querySelectorAll('.cell');
+                                cells[index].classList.add('filled', `color${nextColor}`);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 檢查碰撞
+        function checkCollision(x, y, rotation) {
+            const shape = TETRIS_SHAPES[currentPiece][rotation];
+            for (let i = 0; i < shape.length; i++) {
+                for (let j = 0; j < shape[i].length; j++) {
+                    if (shape[i][j]) {
+                        const newX = x + j;
+                        const newY = y + i;
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) {
+                            return true;
+                        }
+                        if (newY >= 0 && board[newY][newX] !== 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // 放置方塊
+        function placePiece() {
+            const shape = TETRIS_SHAPES[currentPiece][currentRotation];
+            for (let i = 0; i < shape.length; i++) {
+                for (let j = 0; j < shape[i].length; j++) {
+                    if (shape[i][j]) {
+                        const y = currentY + i;
+                        const x = currentX + j;
+                        if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
+                            board[y][x] = nextColor + 1;
+                        }
+                    }
+                }
+            }
+            checkLines();
+            spawnNewPiece();
+        }
+
+        // 檢查完整的行
+        function checkLines() {
+            let linesCleared = 0;
+            for (let i = ROWS - 1; i >= 0; i--) {
+                let isFullLine = true;
+                for (let j = 0; j < COLS; j++) {
+                    if (board[i][j] === 0) {
+                        isFullLine = false;
+                        break;
+                    }
+                }
+                if (isFullLine) {
+                    linesCleared++;
+                    // 移除該行
+                    board.splice(i, 1);
+                    // 在頂部添加空行
+                    board.unshift(new Array(COLS).fill(0));
+                    i++; // 重新檢查該行
+                }
+            }
+
+            if (linesCleared > 0) {
+                lines += linesCleared;
+                score += linesCleared * 100 * level;
+                updateStats();
+
+                // 检查是否升级
+                if (lines % 10 === 0) {
+                    level++;
+                    dropSpeed = Math.max(200, 800 - (level - 1) * 50);
+                    updateStats();
+                }
+            }
+        }
+
+        // 生成新方塊
+        function spawnNewPiece() {
+            if (currentPiece === null) {
+                currentPiece = Math.floor(Math.random() * TETRIS_SHAPES.length);
+                nextColor = Math.floor(Math.random() * 7);
+                currentRotation = 0;
+                currentX = 3;
+                currentY = 0;
+
+                nextPiece = Math.floor(Math.random() * TETRIS_SHAPES.length);
+                let nextColorTemp = Math.floor(Math.random() * 7);
+
+                drawNextBox(nextPiece, nextColorTemp);
+
+                if (checkCollision(currentX, currentY, currentRotation)) {
+                    endGame();
+                }
+            } else {
+                currentPiece = nextPiece;
+                nextColor = document.nextColorValue || 0;
+
+                nextPiece = Math.floor(Math.random() * TETRIS_SHAPES.length);
+                document.nextColorValue = Math.floor(Math.random() * 7);
+
+                drawNextBox(nextPiece, document.nextColorValue);
+
+                currentRotation = 0;
+                currentX = 3;
+                currentY = 0;
+
+                if (checkCollision(currentX, currentY, currentRotation)) {
+                    endGame();
+                }
+            }
+        }
+
+        // 繪製下一個方塊預覽
+        function drawNextBox(piece, color) {
+            const nextBox = document.getElementById('nextBox');
+            nextBox.innerHTML = '';
+            const shape = TETRIS_SHAPES[piece][0];
+            const maxSize = 4;
+
+            for (let i = 0; i < maxSize; i++) {
+                for (let j = 0; j < maxSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (i < shape.length && j < shape[i].length && shape[i][j]) {
+                        cell.classList.add('filled', `color${color}`);
+                    }
+                    nextBox.appendChild(cell);
+                }
+            }
+        }
+
+        // 更新統計信息
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('lines').textContent = lines;
+        }
+
+        // 方塊下落
+        function dropPiece() {
+            if (!gameRunning || gamePaused || gameOver) return;
+
+            if (checkCollision(currentX, currentY + 1, currentRotation)) {
+                placePiece();
+            } else {
+                currentY++;
+                score += 1;
+                updateStats();
+            }
+            drawBoard();
+        }
+
+        // 鍵盤控制
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning || gameOver) return;
+
+            if (e.key === 'p' || e.key === 'P') {
+                togglePause();
+                return;
+            }
+
+            if (gamePaused) return;
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                    if (!checkCollision(currentX - 1, currentY, currentRotation)) {
+                        currentX--;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!checkCollision(currentX + 1, currentY, currentRotation)) {
+                        currentX++;
+                    }
+                    break;
+                case 'ArrowDown':
+                    dropPiece();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    const newRotation = (currentRotation + 1) % TETRIS_SHAPES[currentPiece].length;
+                    if (!checkCollision(currentX, currentY, newRotation)) {
+                        currentRotation = newRotation;
+                    }
+                    break;
+            }
+            drawBoard();
+        });
+
+        // 開始遊戲
+        function startGame() {
+            if (gameRunning) return;
+            gameRunning = true;
+            gameOver = false;
+            gamePaused = false;
+            score = 0;
+            lines = 0;
+            level = 1;
+            dropSpeed = 800;
+            initBoard();
+            currentPiece = null;
+            updateStats();
+            spawnNewPiece();
+            drawBoard();
+            document.getElementById('startBtn').textContent = '進 行 中...';
+            document.getElementById('startBtn').disabled = true;
+
+            gameLoopInterval = setInterval(dropPiece, dropSpeed);
+        }
+
+        // 暫停/繼續
+        function togglePause() {
+            if (!gameRunning || gameOver) return;
+            gamePaused = !gamePaused;
+            document.getElementById('pauseBtn').textContent = gamePaused ? '繼 續 遊 戲' : '暫 停';
+
+            if (gamePaused) {
+                clearInterval(gameLoopInterval);
+            } else {
+                gameLoopInterval = setInterval(dropPiece, dropSpeed);
+            }
+        }
+
+        // 重置遊戲
+        function resetGame() {
+            gameRunning = false;
+            gameOver = false;
+            gamePaused = false;
+            clearInterval(gameLoopInterval);
+            initBoard();
+            currentPiece = null;
+            score = 0;
+            lines = 0;
+            level = 1;
+            updateStats();
+            drawBoard();
+            document.getElementById('startBtn').textContent = '開 始 遊 戲';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').textContent = '暫 停';
+            document.getElementById('gameOverModal').style.display = 'none';
+        }
+
+        // 遊戲結束
+        function endGame() {
+            gameRunning = false;
+            gameOver = true;
+            clearInterval(gameLoopInterval);
+            document.getElementById('finalScore').textContent = `最終分數: ${score}`;
+            document.getElementById('gameOverModal').style.display = 'flex';
+        }
+
+        // 事件監聽
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+        // 初始化
+        initBoard();
+        drawBoard();
+    </script>
+</body>
+</html>

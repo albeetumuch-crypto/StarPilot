@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 貪食蛇遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FFB6D9 0%, #FFC0E0 50%, #FFD9F0 100%);
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 245, 250, 0.98);
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.2);
+            border: 3px solid #FFB6D9;
+        }
+
+        h1 {
+            color: #FF69B4;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #FFB6D9 0%, #FFC0E0 100%);
+            color: #FF1493;
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 1.1em;
+            min-width: 120px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            border: 2px solid #FF69B4;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .game-board {
+            background-color: #fff0f5;
+            border: 4px solid #FFB6D9;
+            margin: 20px 0;
+            display: inline-block;
+            position: relative;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+        }
+
+        canvas {
+            display: block;
+            background-color: #fffafc;
+            border-radius: 16px;
+        }
+
+        .controls {
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        .controls p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #FFB6D9 0%, #FFC0E0 100%);
+            color: #FF1493;
+            border: 2px solid #FF69B4;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #FFD4E5 0%, #FFDBEF 100%);
+            color: #FF69B4;
+            border: 2px solid #FFB6D9;
+        }
+
+        .btn-pause:hover:not(:disabled) {
+            background: linear-gradient(135deg, #FFC0E0 0%, #FFD9F0 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #FFB6D9 0%, #FFAFCD 100%);
+            color: white;
+            border: 2px solid #FF69B4;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #FFA3C7 0%, #FF99CC 100%);
+            transform: translateY(-2px);
+        }
+
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .game-over h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #e74c3c;
+        }
+
+        .game-over p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .game-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            canvas {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 貪食蛇遊戲</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">分數</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">最高分</div>
+                <div class="stat-value" id="highScore">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">速度</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+        </div>
+
+        <div class="game-board">
+            <canvas id="gameCanvas" width="600" height="600"></canvas>
+            <div class="game-over" id="gameOverMessage">
+                <h2>遊戲結束！</h2>
+                <p>最終分數: <span id="finalScore">0</span></p>
+                <p id="gameOverText"></p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <p>⬅️ ➡️ ⬆️ ⬇️ 方向鍵控制蛇</p>
+            <p>🎮 目標：吃掉食物讓蛇變長，避免撞到自己或牆壁</p>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-start" id="startBtn" onclick="startGame()">開始遊戲</button>
+            <button class="btn-pause" id="pauseBtn" onclick="togglePause()" disabled>暫停</button>
+            <button class="btn-reset" id="resetBtn" onclick="resetGame()">重新開始</button>
+        </div>
+
+        <div class="game-info">
+            <strong>遊戲規則：</strong><br>
+            ✓ 蛇吃到紅色食物會變長<br>
+            ✓ 每吃 5 個食物，速度會提升（等級提高）<br>
+            ✓ 撞到牆壁或自己會結束<br>
+            ✓ 分數 = 蛇的長度 - 3
+        </div>
+    </div>
+
+    <script>
+        // 遊戲常數
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const GRID_SIZE = 30;
+        const TILE_COUNT = canvas.width / GRID_SIZE;
+
+        // 遊戲狀態
+        let gameState = {
+            snake: [{x: 10, y: 10}],
+            food: {x: 15, y: 15},
+            direction: {x: 1, y: 0},
+            nextDirection: {x: 1, y: 0},
+            score: 0,
+            highScore: localStorage.getItem('snakeHighScore') || 0,
+            level: 1,
+            isGameRunning: false,
+            isPaused: false,
+            speed: 100, // 毫秒
+            foodsEaten: 0
+        };
+
+        // 初始化
+        function initGame() {
+            gameState.snake = [{x: 10, y: 10}];
+            gameState.direction = {x: 1, y: 0};
+            gameState.nextDirection = {x: 1, y: 0};
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.foodsEaten = 0;
+            gameState.speed = 100;
+            gameState.isPaused = false;
+            generateFood();
+            updateScore();
+            document.getElementById('gameOverMessage').style.display = 'none';
+        }
+
+        // 生成食物
+        function generateFood() {
+            let newFood;
+            let collision = true;
+            while (collision) {
+                newFood = {
+                    x: Math.floor(Math.random() * TILE_COUNT),
+                    y: Math.floor(Math.random() * TILE_COUNT)
+                };
+                collision = gameState.snake.some(segment => 
+                    segment.x === newFood.x && segment.y === newFood.y
+                );
+            }
+            gameState.food = newFood;
+        }
+
+        // 開始遊戲
+        function startGame() {
+            if (!gameState.isGameRunning) {
+                initGame();
+                gameState.isGameRunning = true;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                gameLoop();
+            }
+        }
+
+        // 暫停/繼續
+        function togglePause() {
+            if (gameState.isGameRunning) {
+                gameState.isPaused = !gameState.isPaused;
+                document.getElementById('pauseBtn').textContent = 
+                    gameState.isPaused ? '繼續' : '暫停';
+                if (!gameState.isPaused) {
+                    gameLoop();
+                }
+            }
+        }
+
+        // 重新開始
+        function resetGame() {
+            gameState.isGameRunning = false;
+            gameState.isPaused = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = '暫停';
+            initGame();
+            draw();
+        }
+
+        // 主遊戲循環
+        function gameLoop() {
+            if (!gameState.isGameRunning || gameState.isPaused) return;
+
+            // 更新蛇的方向
+            gameState.direction = {...gameState.nextDirection};
+
+            // 計算新蛇頭位置
+            const head = gameState.snake[0];
+            const newHead = {
+                x: head.x + gameState.direction.x,
+                y: head.y + gameState.direction.y
+            };
+
+            // 檢查撞牆
+            if (newHead.x < 0 || newHead.x >= TILE_COUNT || 
+                newHead.y < 0 || newHead.y >= TILE_COUNT) {
+                endGame('撞到牆壁了！');
+                return;
+            }
+
+            // 檢查撞到自己
+            if (gameState.snake.some(segment => 
+                segment.x === newHead.x && segment.y === newHead.y)) {
+                endGame('撞到自己了！');
+                return;
+            }
+
+            gameState.snake.unshift(newHead);
+
+            // 檢查是否吃到食物
+            if (newHead.x === gameState.food.x && newHead.y === gameState.food.y) {
+                gameState.foodsEaten++;
+                gameState.score = gameState.snake.length - 3;
+                
+                // 每吃 5 個食物提升速度
+                if (gameState.foodsEaten % 5 === 0) {
+                    gameState.level++;
+                    gameState.speed = Math.max(50, gameState.speed - 5);
+                }
+
+                generateFood();
+                updateScore();
+            } else {
+                gameState.snake.pop();
+            }
+
+            draw();
+            setTimeout(gameLoop, gameState.speed);
+        }
+
+        // 結束遊戲
+        function endGame(reason) {
+            gameState.isGameRunning = false;
+            
+            // 更新最高分
+            if (gameState.score > gameState.highScore) {
+                gameState.highScore = gameState.score;
+                localStorage.setItem('snakeHighScore', gameState.highScore);
+            }
+
+            // 顯示遊戲結束訊息
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('gameOverText').textContent = reason;
+            document.getElementById('gameOverMessage').style.display = 'block';
+
+            // 重置按鈕狀態
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = '暫停';
+
+            updateScore();
+        }
+
+        // 更新分數顯示
+        function updateScore() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('highScore').textContent = gameState.highScore;
+            document.getElementById('level').textContent = gameState.level;
+        }
+
+        // 繪製背景裝飾
+        function drawDecorations() {
+            // 繪製隨機分佈的小桃心和小花
+            ctx.save();
+            
+            // 設定隨機種子以保持一致的圖案
+            for (let i = 0; i < 25; i++) {
+                const x = (i * 50 + 80) % canvas.width;
+                const y = (i * 50 + 150) % canvas.height;
+                
+                // 小桃心
+                if (i % 3 === 0) {
+                    drawSmallHeart(x, y);
+                } 
+                // 小星星
+                else if (i % 3 === 1) {
+                    drawSmallStar(x, y);
+                }
+                // 小花
+                else {
+                    drawSmallFlower(x, y);
+                }
+            }
+            
+            ctx.restore();
+        }
+
+        // 繪製小桃心
+        function drawSmallHeart(x, y) {
+            ctx.fillStyle = 'rgba(255, 182, 217, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(x, y + 3);
+            ctx.bezierCurveTo(x - 3, y, x - 4, y - 2, x - 2, y - 3);
+            ctx.bezierCurveTo(x, y - 5, x + 2, y - 3, x + 4, y - 2);
+            ctx.bezierCurveTo(x + 3, y, x, y + 3, x, y + 3);
+            ctx.fill();
+        }
+
+        // 繪製小星星
+        function drawSmallStar(x, y) {
+            ctx.fillStyle = 'rgba(255, 182, 217, 0.4)';
+            const size = 3;
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                const px = x + size * Math.cos(angle);
+                const py = y + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // 繪製小花
+        function drawSmallFlower(x, y) {
+            const petalColor = ['rgba(255, 192, 203, 0.4)', 'rgba(255, 182, 217, 0.4)', 'rgba(255, 192, 224, 0.4)'];
+            
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 2 * Math.PI) / 5;
+                const px = x + 3 * Math.cos(angle);
+                const py = y + 3 * Math.sin(angle);
+                ctx.fillStyle = petalColor[i % 3];
+                ctx.beginPath();
+                ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 花心
+            ctx.fillStyle = 'rgba(255, 215, 240, 0.6)';
+            ctx.beginPath();
+            ctx.arc(x, y, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 繪製遊戲
+        function draw() {
+            // 清空畫布 - 深粉色系漸層背景
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#FFB6D9');
+            gradient.addColorStop(0.5, '#FFC0E0');
+            gradient.addColorStop(1, '#FFAFCD');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 繪製裝飾用的小桃心
+            drawDecorations();
+
+            // 繪製網格
+            ctx.strokeStyle = '#E0E0E0';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i <= TILE_COUNT; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * GRID_SIZE, 0);
+                ctx.lineTo(i * GRID_SIZE, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * GRID_SIZE);
+                ctx.lineTo(canvas.width, i * GRID_SIZE);
+                ctx.stroke();
+            }
+
+            // 繪製蛇
+            gameState.snake.forEach((segment, index) => {
+                if (index === 0) {
+                    // 蛇頭 - Hello Kitty風格
+                    const headX = segment.x * GRID_SIZE + GRID_SIZE / 2;
+                    const headY = segment.y * GRID_SIZE + GRID_SIZE / 2;
+                    
+                    // 臉部 - 白色圓形
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.arc(headX, headY, GRID_SIZE / 2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 臉部輪廓
+                    ctx.strokeStyle = '#FFB6D9';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // 左眼
+                    ctx.fillStyle = '#333333';
+                    ctx.beginPath();
+                    ctx.arc(headX - 5, headY - 4, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 右眼
+                    ctx.fillStyle = '#333333';
+                    ctx.beginPath();
+                    ctx.arc(headX + 5, headY - 4, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 眼睛反光
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(headX - 5, headY - 5, 0.8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(headX + 5, headY - 5, 0.8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 鼻子 - 黑色小點
+                    ctx.fillStyle = '#333333';
+                    ctx.beginPath();
+                    ctx.arc(headX, headY + 1, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Hello Kitty蝴蝶結 - 在左邊
+                    // 左蝴蝶結
+                    ctx.fillStyle = '#FF1493';
+                    ctx.beginPath();
+                    ctx.ellipse(headX - 8, headY - 11, 5, 6, -Math.PI / 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 蝴蝶結中間
+                    ctx.fillStyle = '#FF69B4';
+                    ctx.beginPath();
+                    ctx.arc(headX - 8, headY - 10, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // 蛇身 - Hello Kitty風格的圓形身體
+                    const bodyX = segment.x * GRID_SIZE + GRID_SIZE / 2;
+                    const bodyY = segment.y * GRID_SIZE + GRID_SIZE / 2;
+                    
+                    // 身體 - 淡粉紅
+                    ctx.fillStyle = '#FFE4E1';
+                    ctx.beginPath();
+                    ctx.arc(bodyX, bodyY, GRID_SIZE / 2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 身体轮廓
+                    ctx.strokeStyle = '#FFB6D9';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            });
+
+            // 重置陰影
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            // 繪製食物 - 草莓
+            const foodX = gameState.food.x * GRID_SIZE + GRID_SIZE / 2;
+            const foodY = gameState.food.y * GRID_SIZE + GRID_SIZE / 2;
+
+            // 草莓身體 - 紅色心形
+            ctx.fillStyle = '#E63946';
+            ctx.beginPath();
+            ctx.ellipse(foodX, foodY + 3, GRID_SIZE / 2.2 - 1, GRID_SIZE / 2.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 草莓蒂部 - 綠色葉子
+            ctx.fillStyle = '#228B22';
+            ctx.beginPath();
+            ctx.moveTo(foodX - 4, foodY - 5);
+            ctx.lineTo(foodX - 3, foodY - 10);
+            ctx.lineTo(foodX, foodY - 8);
+            ctx.lineTo(foodX + 3, foodY - 10);
+            ctx.lineTo(foodX + 4, foodY - 5);
+            ctx.fill();
+
+            // 草莓左邊小葉子
+            ctx.beginPath();
+            ctx.ellipse(foodX - 6, foodY - 7, 2, 3, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 草莓右邊小葉子
+            ctx.beginPath();
+            ctx.ellipse(foodX + 6, foodY - 7, 2, 3, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 草莓的籽 - 小黃點
+            ctx.fillStyle = '#FFD700';
+            const seeds = [
+                [-5, -2], [-5, 2], [-5, 6],
+                [0, -3], [0, 2], [0, 6],
+                [5, -2], [5, 2], [5, 6]
+            ];
+            seeds.forEach(seed => {
+                ctx.beginPath();
+                ctx.arc(foodX + seed[0], foodY + seed[1], 0.9, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // 鍵盤控制
+        document.addEventListener('keydown', (e) => {
+            if (!gameState.isGameRunning) return;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                    if (gameState.direction.y === 0) {
+                        gameState.nextDirection = {x: 0, y: -1};
+                        e.preventDefault();
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (gameState.direction.y === 0) {
+                        gameState.nextDirection = {x: 0, y: 1};
+                        e.preventDefault();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (gameState.direction.x === 0) {
+                        gameState.nextDirection = {x: -1, y: 0};
+                        e.preventDefault();
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (gameState.direction.x === 0) {
+                        gameState.nextDirection = {x: 1, y: 0};
+                        e.preventDefault();
+                    }
+                    break;
+                case ' ':
+                    togglePause();
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // 初始繪製
+        draw();
+        updateScore();
+    </script>
+</body>
+</html>
